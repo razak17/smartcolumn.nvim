@@ -25,24 +25,43 @@ local function is_disabled()
 	return false
 end
 
+>>>>>>> f64bce2 (feat: make compatible with virt-column.nvim)
 local function exceed(buf, win, min_colorcolumn)
-	local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, true) -- file scope
-	if M.scope == "line" then
-		lines = vim.api.nvim_buf_get_lines(buf, vim.fn.line(".", win) - 1, vim.fn.line(".", win), true)
-	elseif M.scope == "window" then
-		lines = vim.api.nvim_buf_get_lines(buf, vim.fn.line("w0", win) - 1, vim.fn.line("w$", win), true)
-	end
+   local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, true) -- file scope
+   if config.scope == "line" then
+      lines = vim.api.nvim_buf_get_lines(
+         buf,
+         vim.fn.line(".", win) - 1,
+         vim.fn.line(".", win),
+         true
+      )
+   elseif config.scope == "window" then
+      lines = vim.api.nvim_buf_get_lines(
+         buf,
+         vim.fn.line("w0", win) - 1,
+         vim.fn.line("w$", win),
+         true
+      )
+   end
 
 	local max_column = 0
 	for _, line in pairs(lines) do
 		max_column = math.max(max_column, vim.fn.strdisplaywidth(line))
 	end
 
-	return not is_disabled() and max_column > min_colorcolumn
+   return not vim.tbl_contains(config.disabled_filetypes, vim.bo.ft) and max_column > min_colorcolumn
 end
 
 local function update()
-	local current_buf = vim.api.nvim_get_current_buf()
+   local buf_filetype = vim.api.nvim_buf_get_option(0, "filetype")
+   local colorcolumns
+
+   if type(config.custom_colorcolumn) == "function" then
+      colorcolumns = config.custom_colorcolumn()
+   else
+      colorcolumns = config.custom_colorcolumn[buf_filetype]
+         or config.colorcolumn
+   end
 
 	if not vim.api.nvim_buf_is_loaded(current_buf) then
 		return
