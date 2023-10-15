@@ -99,5 +99,6 @@ local config = {
    disabled_filetypes = { "help", "text", "markdown" },
    custom_colorcolumn = {},
    scope = "file",
+   custom_autocommand = false,
 }
 ```

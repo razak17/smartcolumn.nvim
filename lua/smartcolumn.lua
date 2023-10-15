@@ -1,11 +1,12 @@
 local smartcolumn = {}
 
 local config = {
-   colorcolumn = "0",
+   colorcolumn = "80",
    disabled_filetypes = { "help", "text", "markdown" },
    custom_colorcolumn = {},
-   buffer_config = {},
    scope = "file",
+   custom_autocommand = false,
+   buffer_config = {},
 }
 
 local function exceed(buf, win, min_colorcolumn)
@@ -42,7 +43,7 @@ local function exceed(buf, win, min_colorcolumn)
       and max_column > min_colorcolumn
 end
 
-local function update()
+local function update(conf)
    local buf_filetype = vim.api.nvim_buf_get_option(0, "filetype")
    local colorcolumns
 
@@ -129,6 +130,10 @@ function smartcolumn.setup(user_config)
       config[option] = value
    end
 
+   if config.custom_autocommand then
+      return
+   end
+
    local group = vim.api.nvim_create_augroup("SmartColumn", {})
    vim.api.nvim_create_autocmd(
       { "BufEnter", "CursorMoved", "CursorMovedI", "WinScrolled" },
@@ -139,8 +144,8 @@ function smartcolumn.setup(user_config)
    )
 end
 
-function smartcolumn.setup_buffer(conf)
-   config.buffer_config[vim.api.nvim_get_current_buf()] = conf
+function smartcolumn.setup_buffer(buf, conf)
+   config.buffer_config[buf] = conf
    update()
 end
 
