@@ -47,6 +47,8 @@ local function update(conf)
    local buf_filetype = vim.api.nvim_buf_get_option(0, "filetype")
    local colorcolumns
 
+  if vim.tbl_contains(config.disabled_filetypes, vim.bo.ft) then return end
+
    if type(config.custom_colorcolumn) == "function" then
       colorcolumns = config.custom_colorcolumn()
    else
