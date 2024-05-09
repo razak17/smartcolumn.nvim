@@ -9,7 +9,15 @@ local config = {
    buffer_config = {},
 }
 
+-- Check if the current line exceeds the colorcolumn
+---@param buf number: buffer number
+---@param win number: window number
+---@param min_colorcolumn number?: minimum colorcolumn
 local function exceed(buf, win, min_colorcolumn)
+   if not min_colorcolumn then
+      return false
+   end
+
    local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, true) -- file scope
    if config.scope == "line" then
       lines = vim.api.nvim_buf_get_lines(
@@ -43,11 +51,13 @@ local function exceed(buf, win, min_colorcolumn)
       and max_column > min_colorcolumn
 end
 
-local function update(conf)
-   local buf_filetype = vim.api.nvim_buf_get_option(0, "filetype")
+local function update(buf)
+   local buf_filetype = vim.api.nvim_get_option_value("filetype", { buf = buf })
    local colorcolumns
 
-  if vim.tbl_contains(config.disabled_filetypes, buf_filetype) then return end
+   if vim.tbl_contains(config.disabled_filetypes, buf_filetype) then
+      return
+   end
 
    if type(config.custom_colorcolumn) == "function" then
       colorcolumns = config.custom_colorcolumn()
@@ -100,15 +110,15 @@ local function update(conf)
    end
    min_colorcolumn = tonumber(min_colorcolumn)
 
-   if not min_colorcolumn then
-      return
-   end
+   -- if not min_colorcolumn then
+   --    return
+   -- end
 
    local wins = vim.api.nvim_list_wins()
    for _, win in pairs(wins) do
-      local buf = vim.api.nvim_win_get_buf(win)
-      if buf == current_buf then
-         local current_state = exceed(buf, win, min_colorcolumn)
+      local win_buf = vim.api.nvim_win_get_buf(win)
+      if win_buf == current_buf then
+         local current_state = exceed(win_buf, win, min_colorcolumn)
          if current_state ~= vim.b.prev_state then
             vim.b.prev_state = current_state
             if current_state then
@@ -141,14 +151,16 @@ function smartcolumn.setup(user_config)
       { "BufEnter", "CursorMoved", "CursorMovedI", "WinScrolled" },
       {
          group = group,
-         callback = update,
+         callback = function(args)
+            update(args.buf)
+         end,
       }
    )
 end
 
 function smartcolumn.setup_buffer(buf, conf)
    config.buffer_config[buf] = conf
-   update()
+   update(buf)
 end
 
 return smartcolumn
