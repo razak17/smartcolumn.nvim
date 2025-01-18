@@ -1,3 +1,5 @@
+local smartcolumn = {}
+
 local config = {
    colorcolumn = "80",
    disabled_filetypes = { "help", "text", "markdown" },
@@ -60,14 +62,9 @@ local function update(buf)
    local buf_filetype = vim.api.nvim_get_option_value("filetype", { buf = buf })
    local colorcolumns
 
-<<<<<<< HEAD
    if vim.tbl_contains(config.disabled_filetypes, buf_filetype) then
       return
    end
-||||||| parent of 4bfb538 (chore: fix disabled_filetypes)
-=======
-  if vim.tbl_contains(config.disabled_filetypes, vim.bo.ft) then return end
->>>>>>> 4bfb538 (chore: fix disabled_filetypes)
 
    if type(config.custom_colorcolumn) == "function" then
       colorcolumns = config.custom_colorcolumn()
