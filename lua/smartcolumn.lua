@@ -5,8 +5,9 @@ local config = {
    disabled_filetypes = { "help", "text", "markdown" },
    custom_colorcolumn = {},
    scope = "file",
-   custom_autocommand = false,
+   editorconfig = true,
    buffer_config = {},
+   custom_autocommand = false,
 }
 
 -- Check if the current line exceeds the colorcolumn
@@ -17,7 +18,6 @@ local function exceed(buf, win, min_colorcolumn)
    if not min_colorcolumn then
       return false
    end
-
    local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, true) -- file scope
    if config.scope == "line" then
       lines = vim.api.nvim_buf_get_lines(
@@ -49,6 +49,13 @@ local function exceed(buf, win, min_colorcolumn)
 
    return not vim.tbl_contains(config.disabled_filetypes, vim.bo.ft)
       and max_column > min_colorcolumn
+end
+
+local function colorcolumn_editorconfig(colorcolumns)
+   return vim.b[0].editorconfig
+         and vim.b[0].editorconfig.max_line_length ~= "off"
+         and vim.b[0].editorconfig.max_line_length
+      or colorcolumns
 end
 
 local function update(buf)
@@ -151,9 +158,7 @@ function smartcolumn.setup(user_config)
       { "BufEnter", "CursorMoved", "CursorMovedI", "WinScrolled" },
       {
          group = group,
-         callback = function(args)
-            update(args.buf)
-         end,
+         callback = update,
       }
    )
 end
