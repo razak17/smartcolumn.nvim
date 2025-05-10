@@ -15,6 +15,8 @@ local config = {
 ---@param win number: window number
 ---@param min_colorcolumn number?: minimum colorcolumn
 local function exceed(buf, win, min_colorcolumn)
+   if vim.tbl_contains(config.disabled_filetypes, vim.bo.ft) then return false end
+
    if not min_colorcolumn then
       return false
    end
@@ -35,8 +37,6 @@ local function exceed(buf, win, min_colorcolumn)
       )
    end
 
-   local max_column = 0
-
    for _, line in pairs(lines) do
       local success, column_number = pcall(vim.fn.strdisplaywidth, line)
 
@@ -44,11 +44,10 @@ local function exceed(buf, win, min_colorcolumn)
          return false
       end
 
-      max_column = math.max(max_column, column_number)
+      if column_number > min_colorcolumn then return true end
    end
 
-   return not vim.tbl_contains(config.disabled_filetypes, vim.bo.ft)
-      and max_column > min_colorcolumn
+   return false
 end
 
 local function colorcolumn_editorconfig(colorcolumns)
