@@ -117,3 +117,7 @@ local config = {
    custom_autocommand = false,
 }
 ```
+
+## ⭐ Star History
+
+[![Star History Chart](https://app.repohistory.com/api/svg?repo=m4xshen/smartcolumn.nvim&type=Date&background=0D1117&color=FCE2C6)](https://app.repohistory.com/star-history)
